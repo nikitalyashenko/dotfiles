@@ -20,7 +20,8 @@ return {
             "force",
             {},
             vim.lsp.protocol.make_client_capabilities(),
-            cmp_lsp.default_capabilities())
+            cmp_lsp.default_capabilities()
+        )
 
         require("fidget").setup({})
         require("mason").setup()
@@ -30,10 +31,10 @@ return {
                 "rust_analyzer",
                 "gopls",
                 "tsserver",
+                "angularls",
             },
             handlers = {
                 function(server_name) -- default handler (optional)
-
                     require("lspconfig")[server_name].setup {
                         capabilities = capabilities
                     }
@@ -45,12 +46,41 @@ return {
                         capabilities = capabilities,
                         settings = {
                             Lua = {
-				    runtime = { version = "Lua 5.1" },
+                                runtime = { version = "Lua 5.1" },
                                 diagnostics = {
                                     globals = { "vim", "it", "describe", "before_each", "after_each" },
                                 }
                             }
                         }
+                    }
+                end,
+
+ --required               npm install -g @angular/language-service@latest
+
+                ["angularls"] = function()
+                    local lspconfig = require("lspconfig")
+                    lspconfig.angularls.setup {
+                        cmd = {
+                            "ngserver",
+                            "--stdio",
+                            "--tsProbeLocations",
+                            "/home/nikita/.nvm/versions/node/v22.2.0/lib/node_modules",
+                            "--ngProbeLocations",
+                            "/home/nikita/.nvm/versions/node/v22.2.0/lib/node_modules"
+                        },
+                        on_new_config = function(new_config)
+                            new_config.cmd = {
+                                "ngserver",
+                                "--stdio",
+                                "--tsProbeLocations",
+                                "/home/nikita/.nvm/versions/node/v22.2.0/lib/node_modules",
+                                "--ngProbeLocations",
+                                "/home/nikita/.nvm/versions/node/v22.2.0/lib/node_modules"
+                            }
+                        end,
+                        capabilities = capabilities,
+                        filetypes = { "typescript", "html", "typescriptreact", "typescript.tsx" },
+                        root_dir = lspconfig.util.root_pattern('angular.json', '.git'),
                     }
                 end,
             }
@@ -79,15 +109,26 @@ return {
         })
 
         vim.diagnostic.config({
-            -- update_in_insert = true,
-            float = {
-                focusable = false,
-                style = "minimal",
-                border = "rounded",
-                source = "always",
-                header = "",
-                prefix = "",
-            },
-        })
+        -- update_in_insert = true,
+        virtual_text = {
+            wrap = true,  -- Allow text wrapping
+            max_width = 80,  -- Set maximum width (adjust as needed)
+        },
+        float = {
+            focusable = false,
+            style = "minimal",
+            border = "rounded",
+            source = "always",
+            header = "",
+            prefix = "",
+            wrap = true,  -- Enable text wrapping in float
+            max_width = 80,  -- Set maximum width for float window
+            max_height = 20,  -- Set maximum height for float window
+        },
+        signs = true,
+        underline = true,
+        update_in_insert = false,
+        severity_sort = true,
+    })
     end
 }
